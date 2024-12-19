@@ -6,7 +6,14 @@ import 'package:quiz_app_flutter/src/views/widgets/question_widget.dart';
 import 'package:quiz_app_flutter/src/views/widgets/score_widget.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  const MyHomePage({
+    super.key,
+    required this.isDarkMode,
+    required this.toggleBrightness,
+  });
+
+  final bool isDarkMode;
+  final void Function() toggleBrightness;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -101,41 +108,88 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              if (_isQuizSubmitted)
-                ScoreWidget(
-                    score: _score,
-                    totalQuestions: questions.length,
-                    onRetakeQuiz: _handleRetakeQuiz,
-                    userAnswers: _userAnswers,
-                    questions: List.generate(questions.length,
-                        (i) => Question.fromJson(questions[i])))
-              else ...[
-                Text(
-                  'Question ${_currentQuestionIndex + 1} / ${questions.length}',
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(
+                widget.isDarkMode ? Icons.wb_sunny : Icons.nightlight_round),
+            onPressed: widget.toggleBrightness,
+          ),
+        ],
+      ),
+      body: Container(
+        width: double.infinity,
+        height: size.height,
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            colors: widget.isDarkMode
+                ? [
+                    const Color(0xFF402843), // Deep Black-Grey (Starting Color)
+                    const Color(0xFF112f60)
+                  ]
+                : [
+                    const Color(0xFFFFEBFC), // Starting color
+                    const Color(0xFFADC6FF),
+                  ]
+            // Ending color
+            ,
+            center: Alignment.center,
+            radius: 1.0,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 460),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    if (_isQuizSubmitted)
+                      ScoreWidget(
+                          score: _score,
+                          totalQuestions: questions.length,
+                          onRetakeQuiz: _handleRetakeQuiz,
+                          userAnswers: _userAnswers,
+                          questions: List.generate(questions.length,
+                              (i) => Question.fromJson(questions[i])))
+                    else ...[
+                      SelectableText(
+                          'Question ${_currentQuestionIndex + 1} / ${questions.length}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge!
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              )),
+                      const SizedBox(height: 16),
+                      QuestionWidget(
+                        question: _currentQuestion!,
+                        userAnswer: _userAnswers[_currentQuestionIndex],
+                        onAnswer: _handleAnswer,
+                      ),
+                      const SizedBox(height: 16),
+                      NavigationWidget(
+                        userAnswer: _userAnswers[_currentQuestionIndex],
+                        currentQuestionIndex: _currentQuestionIndex,
+                        totalQuestions: questions.length,
+                        onSubmit: _handleSubmitQuiz,
+                        onNavigate: _handleNavigation,
+                      ),
+                    ]
+                  ],
                 ),
-                const SizedBox(height: 16),
-                QuestionWidget(
-                  question: _currentQuestion!,
-                  userAnswer: _userAnswers[_currentQuestionIndex],
-                  onAnswer: _handleAnswer,
-                ),
-                const SizedBox(height: 16),
-                NavigationWidget(
-                  userAnswer: _userAnswers[_currentQuestionIndex],
-                  currentQuestionIndex: _currentQuestionIndex,
-                  totalQuestions: questions.length,
-                  onSubmit: _handleSubmitQuiz,
-                  onNavigate: _handleNavigation,
-                ),
-               
-              ]
-            ],
+              ),
+            ),
           ),
         ),
       ),
