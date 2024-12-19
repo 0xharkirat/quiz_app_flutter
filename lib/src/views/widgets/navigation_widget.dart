@@ -18,22 +18,40 @@ class NavigationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     return Row(
       children: [
         if (currentQuestionIndex > 0)
-          IconButton(
-            icon: const Icon(Icons.arrow_back),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                backgroundColor:
+                    Theme.of(context).colorScheme.onTertiaryContainer,
+                foregroundColor:
+                    Theme.of(context).colorScheme.tertiaryContainer),
             onPressed: () => onNavigate(Direction.previous),
+            child: const Text('Previous'),
           ),
         const Spacer(),
         if (currentQuestionIndex == totalQuestions - 1)
           ElevatedButton(
-            onPressed: onSubmit,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              disabledMouseCursor: SystemMouseCursors.forbidden,
+            ),
+            onPressed: userAnswer == null ? null : onSubmit,
             child: const Text('Submit'),
           )
         else
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              disabledMouseCursor: SystemMouseCursors.forbidden,
+            ),
             onPressed:
                 userAnswer == null ? null : () => onNavigate(Direction.next),
             child: const Text('Next'),

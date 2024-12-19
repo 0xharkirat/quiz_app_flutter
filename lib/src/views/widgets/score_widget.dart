@@ -19,9 +19,6 @@ class ScoreWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double progress = score / totalQuestions;
-
-    // Filter incorrect questions
     final incorrectQuestions = questions.asMap().entries.where((entry) {
       final index = entry.key;
       final question = entry.value;
@@ -31,8 +28,20 @@ class ScoreWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // Heading
+          Text(
+            'Your Score',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary, // Primary color
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Circular Progress Bar
           Center(
             child: Stack(
               alignment: Alignment.center,
@@ -41,79 +50,125 @@ class ScoreWidget extends StatelessWidget {
                   height: 200,
                   width: 200,
                   child: CircularProgressIndicator(
-                    value: progress,
-                    valueColor:
-                        const AlwaysStoppedAnimation<Color>(Colors.green),
-                    backgroundColor: Colors.grey,
-                    strokeWidth: 12,
+                    strokeCap: StrokeCap.round,
+                    value: score / questions.length,
+                    strokeWidth: 15,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.primary), // Primary color
+                    backgroundColor: Theme.of(context)
+                        .colorScheme
+                        .tertiary
+                        .withOpacity(0.8), // Tertiary container
                   ),
                 ),
-                Text(
-                  '${(progress * 100).toStringAsFixed(0)}%',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Wrong: ${totalQuestions - score}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    Text(
+                      'Right: $score',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
+
+          // Retake Quiz Button
           ElevatedButton(
             onPressed: onRetakeQuiz,
-            child: const Text('Retake Quiz'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor:
+                  Theme.of(context).colorScheme.onPrimary, // Primary color
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+            child: const Text(
+              'Retake Quiz',
+            ),
           ),
           const SizedBox(height: 16),
+
+          // Incorrect Questions Section
           if (incorrectQuestions.isNotEmpty)
-            const Text(
-              'Review Incorrect Questions:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          const SizedBox(height: 8),
-          for (var entry in incorrectQuestions)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey[400]!),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Review Incorrect Answers:',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Q: ${entry.value.question}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
+                const SizedBox(height: 8),
+                for (var entry in incorrectQuestions)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(12),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onPrimary, // Light background for incorrect answers
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .shadow
+                              .withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Your Answer: ${userAnswers[entry.key] ?? "No Answer"}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.red,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Q: ${entry.value.question}',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Your Answer: ${userAnswers[entry.key] ?? "No Answer"}',
+                          style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.error),
+                        ),
+                        Text(
+                          'Correct Answer: ${entry.value.correctAnswer}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      'Correct Answer: ${entry.value.correctAnswer}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.green,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                  ),
+              ],
             ),
         ],
       ),
